@@ -36,6 +36,7 @@ import { id } from "date-fns/locale"
 import { onetoonerequest } from "@/types/request"
 type Listener=(data:any)=>void
 const Listeners=new Map<string,Listener[]>()
+const pendingSocketMessages:string[]=[]
 let socketinstanceref:WebSocket|null=null
 export function socket(){
   if(socketinstanceref) socketinstanceref
@@ -144,6 +145,11 @@ export function socket(){
   const setreloadonetoonerequests=Reloadeverything.getState().setonetoonerequests
   const socketBase = process.env.NEXT_PUBLIC_SOCKET_URL || `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.hostname}:8080`
   socketinstanceref=new WebSocket(`${socketBase}?token=${encodeURIComponent(token)}`)
+  socketinstanceref.onopen=()=>{
+    while(pendingSocketMessages.length&&socketinstanceref?.readyState===WebSocket.OPEN){
+      socketinstanceref.send(pendingSocketMessages.shift()!)
+    }
+  }
   function handlemessage(){
     toast.error("no user found")
     setmessage("No user found")
@@ -971,12 +977,11 @@ export function set(type:string,dataa:any){
     socketinstanceref=socket()
   }
 
+  const message=JSON.stringify({event:type,payload:dataa})
   if(socketinstanceref.readyState===WebSocket.OPEN){
-    socketinstanceref.send(JSON.stringify({event:type,payload:dataa}))
-  } else {
-    socketinstanceref.onopen = () => {
-      socketinstanceref?.send(JSON.stringify({event:type,payload:dataa}))
-    }
+    socketinstanceref.send(message)
+  } else if(socketinstanceref.readyState===WebSocket.CONNECTING){
+    pendingSocketMessages.push(message)
   }
 }
     
