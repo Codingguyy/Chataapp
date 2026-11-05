@@ -142,8 +142,8 @@ export default function Messagesarea() {
     function handlereactmessage(global_id: string, originalmessage: string, emoji: string) {
         set("message:sent:onetooneconversation", {
             token: toklue,
-            senderId: onetooneconversationdetails.senderId._id,
-            recieverId: onetooneconversationdetails.recieverId._id,
+            senderId: onetooneconversationdetails.recieverId._id,
+            recieverId: onetooneconversationdetails.senderId._id,
             message: emoji,
             createdAt: new Date(),
             status: "pending",
@@ -152,7 +152,7 @@ export default function Messagesarea() {
     }
 
     function handleeditmessage(global_id: string) {
-        set("message:sent:edit:onetooneconversation", { token: toklue, global_id: global_id, message: editmessage, senderId: usercurrentid, recieverId: onetooneconversationdetails.recieverId._id })
+        set("message:sent:edit:onetooneconversation", { token: toklue, global_id: global_id, message: editmessage, senderId: usercurrentid, recieverId: onetooneconversationdetails.senderId._id })
     }
 
     function geticon(value: messagestatus) {
