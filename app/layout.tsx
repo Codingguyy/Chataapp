@@ -3,7 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "@/app/styles/globals.css"
 import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
-import Floatingnavbar from "@/components/floatingnavbar";
+import Floatingbarcomponent from '@/components/floatingbarcomponent"
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
 const geistSans = Geist({
@@ -30,7 +30,7 @@ export default function RootLayout({
     <html lang="en" className={inter.variable}>
       <body
         className="relative max-w-9xl flex flex-col items-center justify-start no-scrollbar bg-[#0a0a0a]" style={{fontFamily:"'Robotomono',monospace"}}>
-           <Floatingnavbar/>
+        <Floatingbarcomponent/>
            <div className="w-full pt-14">
              {children}
            </div>
