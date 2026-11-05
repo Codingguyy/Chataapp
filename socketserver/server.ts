@@ -100,7 +100,7 @@ async function bootstrapmapmemory(){
 
         data.groupconversations.forEach((value:any)=>{
             const groupId=String(value._id)
-            groupconversations.set(groupId,{groupId:groupId,name:value.name,description:value.description,code:value.code,members:value.members,admins:value.admins.map((id:any)=>String(id)),createdAt:value.createdAt,createdBy:String(value.createdBy),updatedAt:value.updatedAt,settings:value.settings,status:value.status,blocked:value.blocked||[]})
+            groupconversations.set(groupId,{groupId:groupId,name:value.name,description:value.description,code:value.code,members:value.members.map((member:any)=>({...member,id:String(member.id)})),admins:value.admins.map((id:any)=>String(id)),createdAt:value.createdAt,createdBy:String(value.createdBy),updatedAt:value.updatedAt,settings:value.settings,status:value.status,blocked:value.blocked||[]})
             groupconversationcode.set(value.code,{code:value.code,groupId:groupId})
         })
 
