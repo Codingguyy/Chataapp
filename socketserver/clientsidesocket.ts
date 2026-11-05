@@ -652,7 +652,7 @@ export function socket(){
   }
   if(event==="login:response:existlist:onetooneconversation"){
     const {users}=payload
-    setuserexistlist(users)
+    setuserexistlistt(users)
   }
   if(event==="login:response:requests:onetooneconversation"){
     const {request_send,request_recieve}=payload
