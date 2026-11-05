@@ -78,7 +78,8 @@ type userexistlist={
     setremoveuser:(value:string)=>void,
     setmessage:(value:string)=>void,
     setunreadmesages:(value:number,_id:string)=>void,
-    setseenmesages:(value:boolean,_id:string)=>void
+    setseenmesages:(value:boolean,_id:string)=>void,
+    setreplaceusers: (value: usrlist[]) => void
 }
 type searchvalue={
     value:boolean,
@@ -319,7 +320,8 @@ export const Userexistlistt=create<userexistlist>((set)=>({
     setremoveuser:(value)=>set((v)=>({users:v.users.filter(data=>data._id!==value)})),
     setmessage:(value)=>set({message:value}),
     setunreadmesages:(value,_id)=>set((v)=>({users:v.users.map(data=>data._id===_id?{...data,unred_messages:value}:data)})),
-    setseenmesages:(value,_id)=>set((v)=>({users:v.users.map(data=>data._id===_id?{...data,seen:value}:data)}))
+    setseenmesages:(value,_id)=>set((v)=>({users:v.users.map(data=>data._id===_id?{...data,seen:value}:data)})),
+    setreplaceusers: (value) => set({ users: value }),
 }))
 export const Typingindicator=create<typingindicator>((set)=>({
     id:"",
