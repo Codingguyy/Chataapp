@@ -1806,7 +1806,11 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
        const id=socket._id
        if (id) {
          const sockets=userlist.get(id)
-         sockets?.forEach((entry)=>{ if(entry.socket===socket) sockets.delete(entry) })
+         sockets?.forEach((entry) => {
+    if ((entry.socket as unknown as MySocket) === socket) {
+        sockets.delete(entry);
+    }
+});
          if (!sockets?.size) { userlist.delete(id); handlelogoutonetooneconversation(id) }
        }
        if (id && !userlist.has(id)) {
