@@ -83,6 +83,9 @@ async function bootstrapmapmemory(){
 
         data.onetooneconversations.forEach((value:any)=>{
             oneto1conversations.set(value.chatId,{participants:value.participants,createdAt:value.createdAt,chatId:value.chatId,deletedAt:value.deletedAt,status:value.status})
+            if (!oneto1conversationmessages.has(value.chatId)) {
+                oneto1conversationmessages.set(value.chatId, [])
+            }
         })
 
         data.onetooneconversationmessages.forEach((value:any)=>{
@@ -318,7 +321,7 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
         {/* here i have to do a function and iterration for it*/}
     }
     async function handleonetooneconversationmessages(senderId:string,recieverId:string,message:string,createdAt:Date,_id:string,status:messagestatus,replyto:{global_id:string,message:string},attachment?:messageattachment){
-        if(oneto1conversationmessages.has(getkey(senderId,recieverId))&&oneto1conversationrequest.get(getkey(senderId,recieverId))?.status==="accepted"&&oneto1conversations.has(getkey(senderId,recieverId))){
+        if(oneto1conversationrequest.get(getkey(senderId,recieverId))?.status==="accepted"&&oneto1conversations.get(getkey(senderId,recieverId))?.status==="accepted"){
             const cryptomessageid=await handleoneto1conversationmessages(senderId,recieverId,message,createdAt,_id,status,replyto,attachment)
             const messages_seen=await Getunredmessages(_id,_id===senderId?recieverId:senderId)
             handleonetooneconversationunreadincrement(senderId,recieverId,_id)
@@ -504,7 +507,7 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
     function handleexistonetooneconversationlist(id:string){
         const userss:usrlist[]=[]
         oneto1conversations.forEach((value)=>{
-            if(value.participants.includes(id)){
+            if(value.participants.includes(id)&&value.status==="accepted"){
                 const userdetails:usrlist={name:"",email:"",_id:"",description:""}
                 const users=value.participants.filter(data=>data!==id)[0]
                 userlist.get(users)?.forEach((valuee)=>{
@@ -921,10 +924,9 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
         const group=groupconversations.get(groupId)
         if(group){
         if(response!=="An error occurred"&&typeof response!=="string"){
-            const groupconversation=groupconversationmessages.get(groupId)
-            if(groupconversation){
-                groupconversation.push(response)
-            }
+            const groupconversation=groupconversationmessages.get(groupId)||[]
+            groupconversation.push(response)
+            groupconversationmessages.set(groupId,groupconversation)
             const group_members=group.members
             group_members?.forEach((value)=>{
                 sendmessage(value.id,"request:response:sendmessage:group",{message:"Success",conversation:response})
@@ -1482,7 +1484,7 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
             const {senderId,recieverId,message,createdAt,token,status,replyto,attachment}=payload
             const verify=verifyAuthToken(token)
             if(verify.name&&verify._id===senderId){
-                if(oneto1conversationmessages.has(getkey(senderId,recieverId))&&oneto1conversationrequest.get(getkey(senderId,recieverId))?.status==="accepted"&&oneto1conversations.has(getkey(senderId,recieverId))){
+                if(oneto1conversationrequest.get(getkey(senderId,recieverId))?.status==="accepted"&&oneto1conversations.get(getkey(senderId,recieverId))?.status==="accepted"){
                     await handleonetooneconversationmessages(senderId,recieverId,message,createdAt,verify._id,status,replyto,attachment)
                 }
             }
