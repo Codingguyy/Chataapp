@@ -1004,40 +1004,49 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
   }
    async function handleleavegroup(groupId:string,id:string){
     const group=groupconversations.get(groupId)
-    if(group){
-        const response=await Editgroupleave(groupId,id)
-        if(response!=="Error"){
-        if(group.members.find(data=>data.id===id)){
-        if(group.admins.includes(id)){
-            group.admins=[...group.admins].filter(data=>data!==id)
-            group.members=[...group.members].filter(data=>data.id!==id)
-            if(group.members.length!==0){
-            if(group.createdBy===id){
-                group.createdBy=group.members[0].id
-            }
-            if(group.admins.length===0){
-                group.admins.push(group.members[0].id)
-            }
-            sendmessage(id,"request:response:leavegroup:group",{groupId:groupId,id:id,admin:true,deletee:false})
-            group.members.forEach((value)=>{
-                sendmessage(value.id,"request:response:leavegroup:group",{groupId:groupId,id:id,deletee:false})
-            })
-        }
-        else{
+    if(!group||!group.members.some(member=>member.id===id)){
+        sendmessage(id,"request:response:leavegroup:group",{groupId,id,deletee:false,message:"You are not a member of this group"})
+        return
+    }
+
+    const response=await Editgroupleave(groupId,id)
+    if(response!=="Success"){
+        sendmessage(id,"request:response:leavegroup:group",{groupId,id,deletee:false,message:"Unable to leave this group"})
+        return
+    }
+
+    if(group.admins.includes(id)){
+        group.admins=group.admins.filter(memberId=>memberId!==id)
+        group.members=group.members.filter(member=>member.id!==id)
+
+        if(group.members.length===0){
             groupconversations.delete(groupId)
-            sendmessage(id,"request:response:leavegroup:group",{groupId:groupId,id:id,deletee:true})
+            groupconversationmessages.delete(groupId)
+            groupconversationtyping.delete(groupId)
+            groupconversationcode.delete(group.code)
+            sendmessage(id,"request:response:leavegroup:group",{groupId,id,deletee:true})
+            return
         }
+
+        if(group.createdBy===id){
+            group.createdBy=group.admins[0]||group.members[0].id
         }
-        else{
-            group.members=[...group.members].filter(data=>data.id!==id)
-            sendmessage(id,"request:response:leavegroup:group",{groupId:groupId,id:id,admin:false})
-            group.members.forEach((value)=>{
-                sendmessage(value.id,"request:response:leavegroup:group",{groupId:groupId,id:id,admin:false})
-            })
+        if(group.admins.length===0){
+            group.admins.push(group.members[0].id)
         }
+
+        sendmessage(id,"request:response:leavegroup:group",{groupId,id,admin:true,deletee:false})
+        group.members.forEach(member=>{
+            sendmessage(member.id,"request:response:leavegroup:group",{groupId,id,deletee:false})
+        })
+        return
     }
-        }
-    }
+
+    group.members=group.members.filter(member=>member.id!==id)
+    sendmessage(id,"request:response:leavegroup:group",{groupId,id,admin:false,deletee:false})
+    group.members.forEach(member=>{
+        sendmessage(member.id,"request:response:leavegroup:group",{groupId,id,admin:false,deletee:false})
+    })
   }
   function handlegrouptyping(groupId:string,id:string,name:string,status:boolean){
         const group=groupconversations.get(groupId)
