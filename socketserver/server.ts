@@ -303,7 +303,11 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
             })
         }
         const messages_seen=await Getunredmessages(senderId,pressed)
-        const messages=await handleloadfirstconversations(senderId,recieverId)
+        const messages = await handleloadfirstconversations(
+    senderId,
+    recieverId,
+    pressed
+);
         const messagess=messages?.length?messages.reverse():[]
         const onetooneconversationdetailss:onetooneconversationdetails={senderId:senderdetails,recieverId:recieverdetails,chatId:getkey(senderId,recieverId),conversations:messagess||[],createdAt:oneto1conversations.get(getkey(senderId,recieverId))?.createdAt||new Date(),status:oneto1conversations.get(getkey(senderId,recieverId))?.status||"accepted"}
         userlist.get(pressed)?.forEach((value)=>{
@@ -486,10 +490,17 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
             }
         })
     }
-    async function handleloadfirstconversations(senderId:string,recieverId:string){
-        const messages=await Getonetoonefirstconversations(getkey(senderId,recieverId),pressed)
-        return messages
-    }
+   async function handleloadfirstconversations(
+    senderId: string,
+    recieverId: string,
+    pressed: string
+) {
+    const messages = await Getonetoonefirstconversations(
+        getkey(senderId, recieverId),
+        pressed
+    );
+    return messages;
+}
     function handleexistonetooneconversationlist(id:string){
         const userss:usrlist[]=[]
         const userdetails:usrlist={name:"",email:"",_id:"",description:""}
