@@ -503,9 +503,9 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
 }
     function handleexistonetooneconversationlist(id:string){
         const userss:usrlist[]=[]
-        const userdetails:usrlist={name:"",email:"",_id:"",description:""}
         oneto1conversations.forEach((value)=>{
             if(value.participants.includes(id)){
+                const userdetails:usrlist={name:"",email:"",_id:"",description:""}
                 const users=value.participants.filter(data=>data!==id)[0]
                 userlist.get(users)?.forEach((valuee)=>{
                     userdetails.name=valuee.name
@@ -513,7 +513,9 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
                     userdetails._id=valuee._id
                     userdetails.description=valuee.description
                 })
-                userss.push(userdetails)
+                if (userdetails._id) {
+    userss.push(userdetails)
+}
             }
         })
         userlist.get(id)?.forEach((value)=>{
