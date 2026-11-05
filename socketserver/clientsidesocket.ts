@@ -558,6 +558,10 @@ export function socket(){
   }
   socketinstanceref.onmessage=(eventt)=>{
    const {event,payload}=JSON.parse(eventt.data)
+   if(event==="server:error"){
+    toast.error(payload?.message||"Message could not be sent")
+    return
+   }
    if(event==="login:request:response"){
     const {verify}=payload
     if(verify){
