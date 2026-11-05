@@ -164,29 +164,32 @@ function getsimilarityusers(search:string,name:string){
    }
    return score
 }
-function handleonetooneconversationrequest(senderId:string,recieverId:string){
-    if(oneto1conversationrequest.get(getkey(senderId,recieverId))){
+async function handleonetooneconversationrequest(senderId:string,recieverId:string){
+    const key=getkey(senderId,recieverId)
+    const existing=oneto1conversationrequest.get(key)
+    if(existing&&existing.status!=="rejected"&&existing.status!=="deleted"){
         const message=getrequestsendrecievedmessage(senderId,recieverId)
         userlist.get(senderId)?.forEach((value)=>{
             if(value.socket.readyState===WebSocket.OPEN){
                 value.socket.send(JSON.stringify({event:"request:response:sender:onetooneconversation",payload:{message:message}}))
             }
         })
+        return
     }
-    else{
-        oneto1conversationrequest.set(getkey(senderId,recieverId),{senderId:senderId,recieverId:recieverId,sendAt:new Date(),status:"pending"})
-        userlist.get(senderId)?.forEach((value)=>{
-            if(value.socket.readyState===WebSocket.OPEN){
-                value.socket.send(JSON.stringify({event:"request:response:sender:successfull:onetooneconversation",payload:{message:"Request send Successfully"}}))
-            }
-        })
-        userlist.get(recieverId)?.forEach((value)=>{
-            if(value.socket.readyState===WebSocket.OPEN){
-                value.socket.send(JSON.stringify({event:"request:response:reciever:onetooneconversation",payload:{request:oneto1conversationrequest.get(getkey(senderId,recieverId))}}))
-            }
-        })
-        handlecreaterequest(senderId,recieverId,new Date(),"pending")
-    }
+
+    const request:onetoonerequest={senderId,recieverId,sendAt:new Date(),status:"pending"}
+    await handlecreaterequest(senderId,recieverId,request.sendAt,"pending")
+    oneto1conversationrequest.set(key,request)
+    userlist.get(senderId)?.forEach((value)=>{
+        if(value.socket.readyState===WebSocket.OPEN){
+            value.socket.send(JSON.stringify({event:"request:response:sender:successfull:onetooneconversation",payload:{message:"Request send Successfully"}}))
+        }
+    })
+    userlist.get(recieverId)?.forEach((value)=>{
+        if(value.socket.readyState===WebSocket.OPEN){
+            value.socket.send(JSON.stringify({event:"request:response:reciever:onetooneconversation",payload:{request:request}}))
+        }
+    })
     
 }
 async function handleonetooneconversationrequestaccepted(senderId:string,recieverId:string){
@@ -567,14 +570,22 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
         })
     }
     async function handleleaveonetooneconversation(pressed:string,senderId:string,recieverId:string){
-        if(pressed&&senderId&&recieverId){
+        if(pressed&&senderId&&recieverId&&oneto1conversations.get(getkey(senderId,recieverId))?.participants.includes(pressed)){
+            const saved=await Editonetooneconversationleave(senderId,recieverId,getkey(senderId,recieverId))
+            if(saved!=="Success"){
+                sendmessage(pressed,"request:response:onetooneconversation:leave",{message:"Unable to leave this conversation"})
+                return
+            }
             oneto1conversationmessages.delete(getkey(senderId,recieverId))
             const onetooneconversation=oneto1conversations.get(getkey(senderId,recieverId))
-            if(onetooneconversation?.status){
-            onetooneconversation.status="deleted"
+            if(onetooneconversation){
+                onetooneconversation.status="deleted"
+                onetooneconversation.deletedAt=new Date()
             }
-            oneto1conversationrequest.delete(getkey(senderId,recieverId))
-            await Editonetooneconversationleave(senderId,recieverId,getkey(senderId,recieverId))
+            const existingRequest=oneto1conversationrequest.get(getkey(senderId,recieverId))
+            if(existingRequest){
+                existingRequest.status="rejected"
+            }
             let id=""
             if(pressed===senderId){
                 id=recieverId
@@ -1458,7 +1469,7 @@ function handleonetooneconversationrequestrejected(senderId:string,recieverId:st
             const verify=verifyAuthToken(token)
             if(verify.name&&verify._id===senderId){
                 if(oneto1conversationrequest.get(getkey(senderId,recieverId))?.status!=="accepted"){
-                handleonetooneconversationrequest(senderId,recieverId)
+                    await handleonetooneconversationrequest(senderId,recieverId)
                 }
             }
         }
