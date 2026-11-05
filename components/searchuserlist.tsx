@@ -46,19 +46,21 @@ export default function Userlistttttt() {
     } else {
       return (
         <button
-          className="text-xs px-3 py-1.5 rounded-md bg-indigo-500 text-white hover:bg-indigo-600 transition-colors font-medium"
-          onClick={(e) => { e.stopPropagation(); handlerequestfor1to1conversation(userid, valuee) }}
+          className={`text-xs px-3 py-1.5 rounded-md ${usercurrentid===valuee?"bg-green-600/20":"bg-indigo-500"} text-white ${usercurrentid===valuee?"":"hover:bg-indigo-600"} transition-colors font-medium`}
+          onClick={(e) => { e.stopPropagation();handlerequestfor1to1conversation(userid, valuee) }}
         >
-          Send request
+          {usercurrentid===valuee?"Its you":"Send request"}
         </button>
       )
     }
   }
 
   function handlerequestfor1to1conversation(senderId: string, recieverId: string) {
+    if(String(senderId)!==String(recieverId)){
     set("request:onetooneconversation", { token: toklue, senderId: senderId, recieverId: recieverId })
     if (!onetooneconversationsendrequest.find(data => (data.recieverId === recieverId && data.senderId === senderId))) {
       setonetooneconversationsendrequest({ senderId: senderId, recieverId: recieverId, sendAt: new Date(), status: "pending" })
+    }
     }
   }
 
