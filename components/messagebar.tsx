@@ -31,19 +31,19 @@ export default function Messagebar() {
 
     function handleonetooneconversationdetailsmessage(value: string) {
         setonetooneconversationdetailsmessage(value)
-        set("message:typing:onetooneconversation", { token: toklue, senderId: onetooneconversationdetails.senderId._id, recieverId: onetooneconversationdetails.recieverId._id, typing: true })
+        set("message:typing:onetooneconversation", { token: toklue, senderId: onetooneconversationdetails.recieverId._id, recieverId: onetooneconversationdetails.senderId._id, typing: true })
         setTimeout(() => {
-            set("message:typing:onetooneconversation", { senderId: onetooneconversationdetails.senderId._id, recieverId: onetooneconversationdetails.recieverId._id, token: toklue, typing: false })
+            set("message:typing:onetooneconversation", { senderId: onetooneconversationdetails.recieverId._id, recieverId: onetooneconversationdetails.senderId._id, token: toklue, typing: false })
         }, 1500)
     }
 
     function handleonetooneconversationdetailssendmessage() {
         if (!onetooneconversationdetailsmessage.trim()) return
         if (!editglobal_id && !editmessage) {
-            set("message:sent:onetooneconversation", { token: toklue, senderId: onetooneconversationdetails.senderId._id, recieverId: onetooneconversationdetails.recieverId._id, message: onetooneconversationdetailsmessage, createdAt: new Date(), status: "pending", replyto: { message: replytomessagemessage, global_id: replytomessageglobal_id } })
+            set("message:sent:onetooneconversation", { token: toklue, senderId: onetooneconversationdetails.recieverId._id, recieverId: onetooneconversationdetails.senderId._id, message: onetooneconversationdetailsmessage, createdAt: new Date(), status: "pending", replyto: { message: replytomessagemessage, global_id: replytomessageglobal_id } })
         }
         else if (editglobal_id && editmessage) {
-            set("message:sent:edit:onetooneconversation", { senderId: onetooneconversationdetails.senderId._id, recieverId: onetooneconversationdetails.recieverId._id, global_id: editglobal_id, message: onetooneconversationdetailsmessage, token: toklue })
+            set("message:sent:edit:onetooneconversation", { senderId: onetooneconversationdetails.recieverId._id, recieverId: onetooneconversationdetails.senderId._id, global_id: editglobal_id, message: onetooneconversationdetailsmessage, token: toklue })
         }
         setcleaneditvalue()
         setcleanreplyvalue()
