@@ -18,9 +18,10 @@ export default async function Loadonetooneconversationexistlist(id:string){
     }
     for(const value of conversations){
         if(array.some(data=>data.id===value.chatId)){
-            const idd=value.participants.filter((data:string)=>data!==id)
-            const userdetails=await Getsngleuser(idd)
-            let valuee={unread_messages:array.find(data=>data.id===value._id)?.count,seen:false,name:userdetails.name,email:userdetails.email,description:value?.description||"",_id:idd}
+            const partnerId=value.participants.find((participant:string)=>participant!==id)
+            if(!partnerId) continue
+            const userdetails=await Getsngleuser(partnerId)
+            const valuee={unread_messages:array.find(data=>data.id===value.chatId)?.count||0,seen:false,name:userdetails.name,email:userdetails.email,description:"",_id:partnerId}
             arrayy.push(valuee)
         }
     }
