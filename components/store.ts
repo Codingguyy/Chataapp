@@ -79,7 +79,7 @@ type userexistlist={
     setmessage:(value:string)=>void,
     setunreadmesages:(value:number,_id:string)=>void,
     setseenmesages:(value:boolean,_id:string)=>void,
-    setreplaceusers: (value: usrlist[]) => void
+    setreplaceusers: (value: usrlistt[]) => void
 }
 type searchvalue={
     value:boolean,
